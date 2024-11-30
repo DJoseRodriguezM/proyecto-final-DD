@@ -7,6 +7,8 @@ import paymentsRouter from './routes/payments.js';
 import productsRouter from './routes/products.js';
 import reportsRouter from './routes/reports.js';
 import 'dotenv/config';
+import authMiddleware from './middlewares/authMiddleware.js';
+import isAdmin from './middlewares/isAdmin.js';
 
 const app = express();
 
@@ -18,6 +20,15 @@ const PORT = process.env.PORT || 3000;
 
 // Rutas
 app.use('/auth', authRouter)
+app.use('/auth', authMiddleware, (req, res) => {
+    res.json({ message: 'Acceso concedido', rol: req.rol });
+})
+
+// Ruta protegida con authMiddleware e isAdmin
+app.use('/admin', authMiddleware, isAdmin, (req, res) => {
+    res.json({ message: 'Acceso concedido a la ruta de administrador' });
+});
+
 app.use('/cart', cartRouter)
 app.use('/inventory', inventarioRouter)
 app.use('/payments', paymentsRouter)

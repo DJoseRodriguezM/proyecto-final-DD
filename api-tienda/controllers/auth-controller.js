@@ -23,7 +23,7 @@ export class AuthController {
             });
         }
 
-        const consulta = "SELECT id, nombre, correo, contrasena, rol FROM usuarios WHERE correo = ?";
+        const consulta = "SELECT nombre, correo, contrasena, rol FROM usuarios WHERE correo = ?";
 
         try {
             connection.query(consulta, [email], (error, results) => {
@@ -42,7 +42,7 @@ export class AuthController {
                     })
                 }
 
-                const { id, nombre, correo, contrasena, rol } = results[0];
+                const { nombre, correo, contrasena, rol } = results[0];
 
                 bcrypt.compare(password, contrasena, function (err, result) {
 
@@ -53,9 +53,9 @@ export class AuthController {
                         })
                     }
 
-                    const data = { id, nombre, correo, rol }
+                    const data = { nombre, correo, rol }
 
-                    const token = jwt.sign( { id, correo, rol }, process.env.SECRET_KEY, { expiresIn: "1h" });
+                    const token = jwt.sign( { correo, rol }, process.env.SECRET_KEY, { expiresIn: "1h" });
 
                     return res.status(200).json({
                         error: false,

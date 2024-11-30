@@ -5,7 +5,7 @@ export const LogSchema = z.object({
     password: z.string().min(8),
 })
 
-export const RegSchema = z.object({
+export const RegSchema = z.object({ 
     "nombre": z.string({
         invalid_type_error: "El nombre debe ser un string",
     }).trim().min(3, {
@@ -17,7 +17,7 @@ export const RegSchema = z.object({
     "contrasena": z.string().trim().min(8, {
         message: "La contraseña debe tener al menos 8 caracteres",
     }),
-    "rol": z.enum(["admin", "cliente"]).default("cliente"),
+    "rol": z.enum(["administrador", "cliente"]).default("cliente"),
 })
 
 export const validateLog = (data) => {
