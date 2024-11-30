@@ -6,6 +6,7 @@ import inventarioRouter from './routes/inventario.js';
 import paymentsRouter from './routes/payments.js';
 import productsRouter from './routes/products.js';
 import reportsRouter from './routes/reports.js';
+import 'dotenv/config';
 
 const app = express();
 
