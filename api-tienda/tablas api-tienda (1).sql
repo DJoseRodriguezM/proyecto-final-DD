@@ -29,7 +29,6 @@ CREATE TABLE `productos` (
   `nombre` varchar(100) NOT NULL,
   `descripcion` text,
   `precio` decimal(10,2) NOT NULL,
-  `stock` int(11) NOT NULL DEFAULT '0',
   `categoria` varchar(50) DEFAULT NULL,
   `fecha_creacion` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
@@ -182,5 +181,13 @@ CREATE TABLE `reporte_inventario` (
 -- ----------------------------
 -- Records of reporte_inventario
 -- ----------------------------
+
+Table: inventario
+Columns:
+id int AI PK 
+productos_id int 
+fecha timestamp 
+stock int
+
 
 SET FOREIGN_KEY_CHECKS = 1;
