@@ -80,7 +80,7 @@ export class ProductsController {
               })
           }
   
-          const consult = "INSERT INTO productos (nombre, descripcion, precio, stock, categoria) VALUES (?, ?, ?, ?, ?)"
+          const consult = "INSERT INTO productos (nombre, descripcion, precio, categoria) VALUES (?, ?, ?, ?)"
   
           try{
               const {nombre, descripcion, precio, stock, categoria} = data

@@ -20,12 +20,6 @@ const ProductSchema = z.object(
             return value.toString().length < 10
         }, {message: "El valor no puede ser mas de 10 caracteres"}),
 
-        "stock": z.number({
-            invalid_type_error: "El stock debe ser un numero"
-        }).refine((value)=>{
-            return value.toString().length < 11
-        }, {message: "El valor no puede ser mas de 10 caracteres"}).optional(),
-
         "categoria": z.string({
             invalid_type_error: "La categoria debe ser caracteres"
         }).max(50, {
@@ -34,7 +28,7 @@ const ProductSchema = z.object(
 
         "fecha_creacion": z.string().datetime().refine((date) => !isNaN(Date.parse(date)), {
             message: "Debe ser una fecha válida en formato ISO 8601 ejemplo:2024-11-09T17:27:27.000Z",
-          }).optional(),
+          }).optional()
     }
 ).strict()
 
