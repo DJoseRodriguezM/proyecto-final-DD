@@ -1,9 +1,10 @@
 import Stripe from 'stripe';
 import connection from "../config/db.js";
 import { selectCarritoProducto } from "../bd/db.js";
+import 'dotenv/config';
 
-// Instancia de Stripe (reemplaza con tu clave secreta de Stripe)
-const stripe = new Stripe('sk_test_51QTnjAEL4sjlSoZnkQMFwKhgsSFNKDeTdGSXrIflNhZO5wC1GiESJJUGfJD62DaBWZ4GxWiWG9Wm07IxWZSVgsg700n0vMy75U');
+// Instancia de Stripe
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 const MINIMUM_AMOUNT = 50; // 50 centavos
 
@@ -103,7 +104,7 @@ export class PaymentsController {
                     });
 
                     // Actualizar inventario y vaciar carrito
-                    PaymentsController.updateInventory(busqueda.productos, cart_id);
+                    PaymentsController.updateInventory(busqueda.productos, cart_id, res);
 
                     return res.status(200).json({
                         message: 'Pago procesado con éxito',
@@ -123,7 +124,7 @@ export class PaymentsController {
 
         try {
             connection.query(
-                'SELECT * FROM pagos WHERE usuario_id = ?',
+                'SELECT p.* FROM pagos p JOIN detalle_pagos dp ON p.id = dp.pago_id WHERE dp.usuario_id = ?',
                 [userId],
                 (error, pagos) => {
                     if (error) {
@@ -131,20 +132,34 @@ export class PaymentsController {
                         return res.status(500).json({ message: 'Error al obtener el historial de pagos' });
                     }
 
-                    pagos.forEach((pago) => {
-                        connection.query(
-                            'SELECT * FROM detalles_pago WHERE pago_id = ?',
-                            [pago.id],
-                            (error, detalles) => {
-                                if (error) {
-                                    console.error(error);
-                                }
-                                pago.detalles = detalles;
-                            }
-                        );
-                    });
+                    const pagosConDetalles = [];
 
-                    return res.status(200).json(pagos);
+                    const obtenerDetalles = (pago) => {
+                        return new Promise((resolve, reject) => {
+                            connection.query(
+                                'SELECT * FROM detalle_pagos WHERE pago_id = ?',
+                                [pago.id],
+                                (error, detalles) => {
+                                    if (error) {
+                                        console.error(error);
+                                        return reject(error);
+                                    }
+                                    pago.detalles = detalles;
+                                    pagosConDetalles.push(pago);
+                                    resolve();
+                                }
+                            );
+                        });
+                    };
+
+                    Promise.all(pagos.map(obtenerDetalles))
+                        .then(() => {
+                            return res.status(200).json(pagosConDetalles);
+                        })
+                        .catch((error) => {
+                            console.error(error);
+                            return res.status(500).json({ message: 'Error al obtener los detalles de los pagos' });
+                        });
                 }
             );
         } catch (error) {
@@ -154,30 +169,34 @@ export class PaymentsController {
     }
 
     // Actualizar inventario y vaciar carrito
-    static async updateInventory(cart_items, cart_id) {
+    static async updateInventory(cart_items, cart_id, res) {
         try {
-            // Reducir el inventario de cada producto
-            cart_items.forEach((producto) => {
-                connection.query(
-                    'UPDATE inventario SET stock = stock - ? WHERE productos_id = ?',
-                    [producto.cantidad, producto.producto_id],
-                    (error) => {
-                        if (error) {
-                            console.error('Error al actualizar inventario:', error.message);
-                        }
-                    }
+            // Verificar si hay suficiente inventario para cada producto
+            for (const producto of cart_items) {
+                const [rows] = await connection.promise().query(
+                    'SELECT stock FROM inventario WHERE productos_id = ?',
+                    [producto.producto_id]
                 );
-            });
+
+                if (rows.length === 0 || rows[0].stock < producto.cantidad) {
+                    return res.status(400).json({
+                        message: `No hay suficiente inventario para el producto con ID ${producto.producto_id}`
+                    });
+                }
+            }
+
+            // Reducir el inventario de cada producto
+            for (const producto of cart_items) {
+                await connection.promise().query(
+                    'UPDATE inventario SET stock = stock - ? WHERE productos_id = ?',
+                    [producto.cantidad, producto.producto_id]
+                );
+            }
 
             // Vaciar el carrito del usuario
-            connection.query(
+            await connection.promise().query(
                 'DELETE FROM carritos WHERE id = ?',
-                [cart_id],
-                (error) => {
-                    if (error) {
-                        console.error('Error al vaciar carrito:', error.message);
-                    }
-                }
+                [cart_id]
             );
         } catch (error) {
             console.error('Error al actualizar inventario o vaciar el carrito:', error.message);
