@@ -18,6 +18,11 @@ app.use(corsMiddleware());
 
 const PORT = process.env.PORT || 3000;
 
+// Ruta principal
+app.get('/', (req, res) => {
+    res.json({ message: 'Servidor funcionando correctamente' });
+});
+
 // Rutas
 app.use('/auth', authRouter)
 
