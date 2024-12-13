@@ -1,3 +1,13 @@
+-- Credenciales:
+-- DB_HOST=34.132.196.9
+-- DB_PORT=3306
+-- DB_USER=admin
+-- DB_PASSWORD=djoserm212003
+-- DB_NAME=Proy_Final_DD
+-- SECRET_KEY=dmfgkjwnjnjiasnijdnjewas123
+-- STRIPE_SECRET_KEY=sk_test_51QTnjAEL4sjlSoZnkQMFwKhgsSFNKDeTdGSXrIflNhZO5wC1GiESJJUGfJD62DaBWZ4GxWiWG9Wm07IxWZSVgsg700n0vMy75U
+
+
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
@@ -82,7 +92,6 @@ DROP TABLE IF EXISTS `detalle_pagos`;
 CREATE TABLE `detalle_pagos` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `usuario_id` int(11) NOT NULL,
-  `carrito_id` int(11) NOT NULL,
   `pago_id` int(11) NOT NULL,
   `producto_id` int(11) NOT NULL,
   `cantidad` int(11) NOT NULL,
@@ -181,13 +190,5 @@ CREATE TABLE `reporte_inventario` (
 -- ----------------------------
 -- Records of reporte_inventario
 -- ----------------------------
-
-Table: inventario
-Columns:
-id int AI PK 
-productos_id int 
-fecha timestamp 
-stock int
-
 
 SET FOREIGN_KEY_CHECKS = 1;
